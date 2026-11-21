@@ -1,0 +1,17 @@
+{
+  "name": "@ota/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node standalone.js",
+    "start": "node standalone.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@ota/core": "*",
+    "@ota/ai-engine": "*",
+    "@ota/supply-orchestrator": "*",
+    "@ota/money-ops": "*"
+  }
+}

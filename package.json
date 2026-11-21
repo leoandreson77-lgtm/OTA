@@ -1,0 +1,31 @@
+{
+  "name": "ai-native-ota",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-Native OTA Platform - Booking Engine + Contact Center CRM with LLM Agents & Automated Finance",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspaces --if-present build",
+    "test": "npm run --workspaces --if-present test",
+    "start:api": "npm run --workspace=@ota/api dev",
+    "start:web": "npm run --workspace=@ota/web dev"
+  },
+  "keywords": [
+    "ota",
+    "travel",
+    "ai-agent",
+    "crm",
+    "gds",
+    "ndc",
+    "copilot",
+    "reconciliation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
