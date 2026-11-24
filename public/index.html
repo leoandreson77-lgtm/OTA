@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Native OTA Platform — Control Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af',
+              900: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
+
+  <!-- Header Navigation -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+          <i class="fa-solid fa-plane-departure text-lg"></i>
+        </div>
+        <div>
+          <span class="font-bold text-lg text-white tracking-tight">AI-Native OTA</span>
+          <span class="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">v1.0 Proposal Engine</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-1 bg-slate-800/60 p-1 rounded-xl border border-slate-700/60">
+        <button onclick="switchTab('search')" id="tab-btn-search" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium transition text-white bg-blue-600 shadow-sm">
+          <i class="fa-solid fa-compass mr-1.5"></i> Booking Engine
+        </button>
+        <button onclick="switchTab('copilot')" id="tab-btn-copilot" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium transition text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-headset mr-1.5"></i> Agent Copilot & CRM
+        </button>
+        <button onclick="switchTab('disruption')" id="tab-btn-disruption" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium transition text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-bolt mr-1.5"></i> Disruption Hub (<2m)
+        </button>
+        <button onclick="switchTab('money')" id="tab-btn-money" class="nav-tab px-4 py-1.5 rounded-lg text-sm font-medium transition text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-receipt mr-1.5"></i> Money & Recon Ops
+        </button>
+      </nav>
+
+      <!-- Status Indicator -->
+      <div class="flex items-center space-x-2 text-xs">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-slate-400">Core Graph: <span class="text-emerald-400 font-mono">ONLINE</span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- ==================== TAB 1: BOOKING & SUPPLY ORCHESTRATION ==================== -->
+    <section id="tab-search" class="tab-content block space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Search Controls -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-white flex items-center">
+              <i class="fa-solid fa-magnifying-glass text-blue-500 mr-2"></i> Supply Search
+            </h2>
+            <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">Look-to-Book Shield active</span>
+          </div>
+
+          <form id="search-form" onsubmit="handleFlightSearch(event)" class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Origin (IATA)</label>
+                <input type="text" id="origin" value="DXB" maxlength="3" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm uppercase font-mono text-white focus:outline-none focus:border-blue-500" required>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Destination (IATA)</label>
+                <input type="text" id="destination" value="LHR" maxlength="3" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm uppercase font-mono text-white focus:outline-none focus:border-blue-500" required>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Departure Date</label>
+                <input type="date" id="dep-date" value="2026-11-25" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" required>
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Cabin Class</label>
+                <select id="cabin-class" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                  <option value="ECONOMY">Economy</option>
+                  <option value="BUSINESS">Business</option>
+                  <option value="FIRST">First</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" id="search-btn" class="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 font-medium rounded-xl text-sm text-white shadow-lg shadow-blue-600/30 transition flex items-center justify-center">
+              <span>Find Flights Across GDS + NDC</span>
+            </button>
+          </form>
+
+          <!-- Look-to-book info box -->
+          <div class="mt-6 p-4 rounded-xl bg-blue-950/30 border border-blue-900/40 text-xs text-blue-300 space-y-2">
+            <div class="font-semibold flex items-center">
+              <i class="fa-solid fa-shield-halved text-blue-400 mr-1.5"></i> Look-to-Book Shield Protection:
+            </div>
+            <p class="text-slate-400">Routes are cached predicting user query patterns to prevent 95% of airline GDS search fees ($0.003/query savings).</p>
+            <div id="cache-status-badge" class="font-mono text-[11px] text-emerald-400 mt-1">Ready for search</div>
+          </div>
+        </div>
+
+        <!-- Right: Search Results & Offers -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-slate-300">Live Supplier Aggregation (Ranked by Margin & Flex)</h3>
+            <span id="results-count" class="text-xs text-slate-400">2 offers ready</span>
+          </div>
+
+          <div id="offers-list" class="space-y-4">
+            <!-- Simulated Offer Cards inserted dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 2: AGENT COPILOT & CRM ==================== -->
+    <section id="tab-copilot" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Unified Customer & PNR View (1 Screen) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h2 class="text-base font-semibold text-white flex items-center">
+              <i class="fa-solid fa-user-tie text-indigo-400 mr-2"></i> Unified Trip Graph
+            </h2>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">GOLD TIER</span>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Passenger:</span>
+              <span class="text-white font-medium">Sarah Jenkins</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Booking Ref:</span>
+              <span class="text-white font-mono font-medium">OTA-2026-EK89</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">PNR / Supplier:</span>
+              <span class="text-blue-400 font-mono font-bold">X7Q9AB (Amadeus)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Flight:</span>
+              <span class="text-white">EK-512 (DXB ✈️ LHR)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Fare Basis:</span>
+              <span class="text-slate-300 font-mono">YFLEXOW ($510.00)</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Ticket Status:</span>
+              <span class="text-emerald-400 font-medium">ISSUED & CONFIRMED</span>
+            </div>
+          </div>
+
+          <!-- Fare Rule Calculator Button -->
+          <div class="pt-2 border-t border-slate-800">
+            <button onclick="explainFareRules()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-medium text-slate-200 transition flex items-center justify-center">
+              <i class="fa-solid fa-calculator text-indigo-400 mr-2"></i> AI Fare Rule Refund Calculator
+            </button>
+            <div id="fare-rule-box" class="mt-3 p-3 rounded-lg bg-indigo-950/30 border border-indigo-900/40 text-xs text-indigo-200 hidden">
+              <!-- Result injected here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Center & Right: Live Call Transcription & Copilot -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center space-x-3">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <h3 class="text-base font-semibold text-white">Live Inbound Call Audio Stream</h3>
+              </div>
+              <div id="sentiment-indicator" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                Sentiment: Neutral
+              </div>
+            </div>
+
+            <!-- Pre-set simulator buttons -->
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="text-slate-400 self-center">Simulate Customer:</span>
+              <button onclick="simulateCall('frustrated')" class="px-2.5 py-1 bg-red-950/60 hover:bg-red-900/80 border border-red-800/60 text-red-300 rounded-lg transition">
+                😠 "Flight delay! Call manager or I will chargeback"
+              </button>
+              <button onclick="simulateCall('refund')" class="px-2.5 py-1 bg-blue-950/60 hover:bg-blue-900/80 border border-blue-800/60 text-blue-300 rounded-lg transition">
+                💼 "I want to cancel my ticket, what is the refund?"
+              </button>
+              <button onclick="simulateCall('friendly')" class="px-2.5 py-1 bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-800/60 text-emerald-300 rounded-lg transition">
+                😊 "Just confirming my baggage allowance"
+              </button>
+            </div>
+
+            <!-- Live Transcript Box -->
+            <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 min-h-[90px] relative">
+              <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">STT Stream (PII Redacted with Guardrails):</div>
+              <p id="live-transcript-text">Waiting for customer speech...</p>
+            </div>
+
+            <!-- AI Copilot Live Insights -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              
+              <!-- Next Best Action -->
+              <div class="p-4 rounded-xl bg-blue-950/30 border border-blue-800/40 space-y-2">
+                <div class="flex items-center justify-between text-xs font-semibold text-blue-400">
+                  <span><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Next Best Action (NBA)</span>
+                  <span id="copilot-conf" class="text-[10px] bg-blue-500/20 px-2 py-0.5 rounded font-mono">92% Match</span>
+                </div>
+                <h4 id="nba-title" class="text-sm font-bold text-white">Acknowledge & Inspect PNR</h4>
+                <p id="nba-desc" class="text-xs text-slate-300">Confirm passenger name and verify flight status before quoting airline penalties.</p>
+              </div>
+
+              <!-- Suggested Response Script -->
+              <div class="p-4 rounded-xl bg-purple-950/30 border border-purple-800/40 space-y-2">
+                <div class="text-xs font-semibold text-purple-400">
+                  <i class="fa-solid fa-comment-dots mr-1.5"></i> One-Click Agent Speaking Script:
+                </div>
+                <p id="agent-script-text" class="text-xs text-slate-300 italic">"I completely understand. Let me check your booking right away."</p>
+                <button onclick="copyAgentScript()" class="text-[11px] text-purple-300 hover:text-white font-medium flex items-center pt-1">
+                  <i class="fa-regular fa-copy mr-1"></i> Copy to Agent Chat
+                </button>
+              </div>
+            </div>
+
+            <!-- Auto Wrap-up Button -->
+            <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
+              <span class="text-xs text-slate-400">Automated Case Wrap-up & QA Scoring (100% of Calls)</span>
+              <button onclick="generateWrapUp()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-medium transition shadow-lg shadow-emerald-600/20">
+                <i class="fa-solid fa-clipboard-check mr-1.5"></i> Auto Wrap-Up & Score QA
+              </button>
+            </div>
+            
+            <div id="wrapup-box" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs hidden"></div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 3: PROACTIVE DISRUPTIONS ==================== -->
+    <section id="tab-disruption" class="tab-content hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center">
+              <i class="fa-solid fa-bell text-amber-400 mr-2"></i> Proactive Flight Disruption Engine
+            </h2>
+            <p class="text-xs text-slate-400">Detect delays & cancellations, prioritize VIP travelers, and auto-dispatch alternate flights within 2 minutes.</p>
+          </div>
+          <button onclick="triggerDisruptionSim()" class="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-amber-600/30 transition">
+            <i class="fa-solid fa-bolt mr-1.5"></i> Simulate 240min Delay on EK-512
+          </button>
+        </div>
+
+        <div id="disruption-view" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Left: Incident Details -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-semibold text-slate-300">Disruption Triage & Priority Score</h3>
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Impacted Flight:</span>
+                <span class="text-white font-mono font-bold">EK-512 (DXB ✈️ LHR)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Delay Time:</span>
+                <span class="text-amber-400 font-bold">240 Minutes (4 Hours)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Traveler Priority Score:</span>
+                <span class="px-2 py-0.5 rounded font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">95 / 100 (Platinum/Gold Rule)</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Automated Action:</span>
+                <span class="text-emerald-400 font-semibold">Seat Pre-held on EK-902 & WhatsApp Sent</span>
+              </div>
+            </div>
+
+            <!-- Alternative Flights -->
+            <h3 class="text-sm font-semibold text-slate-300 pt-2">Auto-Priced Rebooking Options (Zero Extra Cost)</h3>
+            <div class="space-y-2">
+              <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700 flex justify-between items-center text-xs">
+                <div>
+                  <div class="font-bold text-white">EK-902 (Direct Flight)</div>
+                  <div class="text-slate-400">Dep: 14:30 | Arr: 18:45 | Free Meal Voucher</div>
+                </div>
+                <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded font-semibold text-[11px]">$0.00 Rebook</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: WhatsApp Outreach Preview -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-semibold text-slate-300">Outbound Traveler WhatsApp Mockup (< 2 Min SLA)</h3>
+            <div class="bg-emerald-950/20 border border-emerald-800/50 rounded-2xl p-5 shadow-inner">
+              <div class="flex items-center space-x-2 text-xs font-semibold text-emerald-400 mb-3">
+                <i class="fa-brands fa-whatsapp text-base"></i>
+                <span>AI Travel Assistant • Verified</span>
+              </div>
+              <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs text-slate-200 space-y-3 font-sans shadow-lg">
+                <p class="font-bold text-amber-400">⚠️ Flight Delay Alert: Flight EK-512</p>
+                <p>Hello Sarah, we detected your flight EK-512 is delayed by 240 minutes.</p>
+                <p>To avoid waiting at the airport, we already pre-reserved seat 14A for you on flight <span class="font-bold text-white">EK-902 departing at 14:30</span> at <strong>NO extra charge</strong>.</p>
+                <div class="pt-2 flex flex-col space-y-2">
+                  <button class="w-full py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 transition">
+                    ✅ Confirm EK-902 Seat
+                  </button>
+                  <button class="w-full py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition">
+                    ❌ Cancel & Claim Full Refund
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==================== TAB 4: MONEY OPS & RECONCILIATION ==================== -->
+    <section id="tab-money" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Three-Way Reconciliation -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h2 class="text-base font-semibold text-white flex items-center">
+              <i class="fa-solid fa-arrows-split-up-and-left text-emerald-400 mr-2"></i> Continuous 3-Way Match Recon
+            </h2>
+            <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-mono">100% MATCHED</span>
+          </div>
+
+          <p class="text-xs text-slate-400">Reconciles Booking DB vs Payment Gateway (Stripe) vs Airline BSP/ARC report automatically, eliminating spreadsheet delays.</p>
+
+          <div class="space-y-3 text-xs bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <div class="flex justify-between py-1 border-b border-slate-900">
+              <span class="text-slate-400">1. Internal Trip Graph:</span>
+              <span class="text-white font-mono font-medium">$510.00 USD</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-900">
+              <span class="text-slate-400">2. Stripe Gateway Captured:</span>
+              <span class="text-white font-mono font-medium">$510.00 USD (Fee: $14.50)</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-900">
+              <span class="text-slate-400">3. IATA BSP Airline Billed:</span>
+              <span class="text-white font-mono font-medium">$470.00 USD (Net + Tax - Comm)</span>
+            </div>
+            <div class="flex justify-between py-1.5 font-bold">
+              <span class="text-emerald-400">Net Profit Margin Realized:</span>
+              <span class="text-emerald-400 font-mono text-sm">+$25.50 USD</span>
+            </div>
+          </div>
+
+          <button onclick="runReconciliation()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition">
+            <i class="fa-solid fa-sync mr-1.5"></i> Re-run 3-Way Audit Match
+          </button>
+        </div>
+
+        <!-- Automated Chargeback Engine -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h2 class="text-base font-semibold text-white flex items-center">
+              <i class="fa-solid fa-shield-virus text-purple-400 mr-2"></i> Chargeback Evidence Pack Builder
+            </h2>
+            <span class="text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded font-mono">Win Rate: 95%</span>
+          </div>
+
+          <p class="text-xs text-slate-400">When a customer files a dispute (Reason 10.4 Fraud), AI automatically extracts 3DS cryptograms, PNR e-tickets, and IP logs into a representment pack.</p>
+
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2 text-xs">
+            <div class="flex items-center justify-between text-purple-300 font-semibold">
+              <span>Dispute ID: DISPUTE-VISA-7892</span>
+              <span>Amount: $510.00</span>
+            </div>
+            <div class="text-slate-400">Bundled Evidence Files:</div>
+            <ul class="list-disc list-inside text-slate-300 space-y-1 pl-1">
+              <li>IATA E-Ticket Receipt (176-2490192831)</li>
+              <li>3-Domain Secure Proof (Liability shifted to Bank)</li>
+              <li>Device IP & Geolocation Audit Trail</li>
+            </ul>
+          </div>
+
+          <button onclick="generateEvidencePack()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-purple-600/30 transition">
+            <i class="fa-solid fa-file-pdf mr-1.5"></i> Generate Bank Rebuttal Evidence Pack
+          </button>
+
+          <div id="chargeback-box" class="p-3 bg-slate-950 rounded-lg border border-slate-800 text-[11px] text-slate-300 hidden max-h-36 overflow-y-auto font-mono"></div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const API_URL = (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '3000')
+      ? 'http://localhost:4000'
+      : '';
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('block'));
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+        btn.classList.add('text-slate-400');
+      });
+
+      const activeTab = document.getElementById('tab-' + tabId);
+      const activeBtn = document.getElementById('tab-btn-' + tabId);
+      if (activeTab && activeBtn) {
+        activeTab.classList.remove('hidden');
+        activeTab.classList.add('block');
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+      }
+    }
+
+    // Flight Search
+    async function handleFlightSearch(e) {
+      if (e) e.preventDefault();
+      const origin = document.getElementById('origin').value;
+      const destination = document.getElementById('destination').value;
+      const depDate = document.getElementById('dep-date').value;
+      const cabinClass = document.getElementById('cabin-class').value;
+      const badge = document.getElementById('cache-status-badge');
+
+      badge.innerText = 'Searching across GDS & NDC...';
+      badge.className = 'font-mono text-[11px] text-amber-400 mt-1';
+
+      try {
+        const res = await fetch(`${API_URL}/api/flights/search`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ origin, destination, departureDate: depDate, cabinClass })
+        });
+        const data = await res.json();
+
+        if (data.fromCache) {
+          badge.innerText = '⚡ SERVED FROM LOOK-TO-BOOK SHIELD (0ms GDS Cost)';
+          badge.className = 'font-mono text-[11px] text-emerald-400 font-bold mt-1';
+        } else {
+          badge.innerText = `Aggregated from: ${data.suppliersResponded.join(', ')} (Cached for next queries)`;
+          badge.className = 'font-mono text-[11px] text-blue-400 mt-1';
+        }
+
+        renderOffers(data.offers);
+      } catch (err) {
+        badge.innerText = 'API Offline - Rendered via Fallback Engine';
+        badge.className = 'font-mono text-[11px] text-slate-400 mt-1';
+        renderOffers(defaultOffers);
+      }
+    }
+
+    const defaultOffers = [
+      {
+        offerId: 'OFFER-1',
+        supplier: 'AMADEUS',
+        price: { totalPrice: 510, currency: 'USD', markup: 25 },
+        segments: [{ flightNumber: 'EK-512', carrierCode: 'EK', departureTime: '08:15', arrivalTime: '12:45', durationMinutes: 270, originAirport: 'DXB', destAirport: 'LHR' }],
+        fareBrand: { brandName: 'Standard Flex', isRefundable: true, checkedBaggagePieces: 2 }
+      },
+      {
+        offerId: 'OFFER-2',
+        supplier: 'NDC_DIRECT',
+        price: { totalPrice: 455, currency: 'USD', markup: 20 },
+        segments: [{ flightNumber: 'BA-107', carrierCode: 'BA', departureTime: '11:30', arrivalTime: '16:10', durationMinutes: 280, originAirport: 'DXB', destAirport: 'LHR' }],
+        fareBrand: { brandName: 'Basic Economy (NDC)', isRefundable: false, checkedBaggagePieces: 1 }
+      }
+    ];
+
+    function renderOffers(offers) {
+      const container = document.getElementById('offers-list');
+      container.innerHTML = '';
+      offers.forEach(o => {
+        const seg = o.segments[0];
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-blue-500/50 transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4';
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${o.supplier === 'NDC_DIRECT' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}">${o.supplier}</span>
+              <span class="text-xs font-semibold text-slate-300">${o.fareBrand.brandName}</span>
+              ${o.fareBrand.isRefundable ? '<span class="text-[10px] text-emerald-400 bg-emerald-950/40 px-1.5 py-0.5 rounded">Refundable</span>' : '<span class="text-[10px] text-amber-400 bg-amber-950/40 px-1.5 py-0.5 rounded">Non-Refundable</span>'}
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="text-lg font-bold text-white">${seg.originAirport} ✈️ ${seg.destAirport}</span>
+              <span class="text-sm font-semibold text-blue-400">${seg.flightNumber}</span>
+              <span class="text-xs text-slate-400">Duration: ${Math.floor(seg.durationMinutes/60)}h ${seg.durationMinutes%60}m</span>
+            </div>
+            <div class="text-xs text-slate-400">Checked Bags: ${o.fareBrand.checkedBaggagePieces} Included</div>
+          </div>
+
+          <div class="flex flex-col md:items-end w-full md:w-auto">
+            <div class="text-2xl font-bold text-white font-mono">$${o.price.totalPrice} <span class="text-xs text-slate-400 font-normal">USD</span></div>
+            <span class="text-[10px] text-emerald-400 mb-2">OTA Markup: +$${o.price.markup}</span>
+            <button onclick="switchTab('copilot')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition">
+              Select & View in CRM
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      document.getElementById('results-count').innerText = `${offers.length} offers ready`;
+    }
+
+    // Call Simulation
+    async function simulateCall(scenario) {
+      let snippet = '';
+      if (scenario === 'frustrated') {
+        snippet = "I have been waiting for hours! EK-512 was cancelled and your customer care is ridiculous. I want to speak to a manager or I am calling my lawyer and initiating a chargeback right now!";
+      } else if (scenario === 'refund') {
+        snippet = "Hello, my meeting was rescheduled. Can you check my PNR X7Q9AB and tell me what the cancellation fee is and how much refund I will receive?";
+      } else {
+        snippet = "Hi, I just want to confirm if my ticket includes 2 checked bags for my flight to London tomorrow.";
+      }
+
+      document.getElementById('live-transcript-text').innerText = snippet;
+
+      try {
+        const res = await fetch(`${API_URL}/api/copilot/live-transcript`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript: snippet })
+        });
+        const data = await res.json();
+        updateCopilotUi(data);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function updateCopilotUi(data) {
+      const badge = document.getElementById('sentiment-indicator');
+      if (data.escalationRiskDetected) {
+        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse';
+        badge.innerText = '⚠️ ESCALATION RISK DETECTED';
+      } else if (data.sentiment === 'POSITIVE') {
+        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        badge.innerText = '😊 Sentiment: Positive';
+      } else {
+        badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40';
+        badge.innerText = 'Sentiment: Neutral';
+      }
+
+      document.getElementById('nba-title').innerText = data.suggestedNextBestAction.title;
+      document.getElementById('nba-desc').innerText = data.suggestedNextBestAction.description;
+      document.getElementById('agent-script-text').innerText = `"${data.draftedResponse}"`;
+      document.getElementById('copilot-conf').innerText = `${Math.round(data.suggestedNextBestAction.confidence * 100)}% Match`;
+    }
+
+    async function explainFareRules() {
+      const box = document.getElementById('fare-rule-box');
+      box.classList.remove('hidden');
+      box.innerHTML = 'Computing airline cancellation penalties...';
+
+      try {
+        const res = await fetch(`${API_URL}/api/copilot/fare-rule-explain`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fareBasisCode: 'YFLEXOW', ticketPrice: 510 })
+        });
+        const data = await res.json();
+        box.innerHTML = `
+          <div class="font-bold text-emerald-400 mb-1">Fare Analysis Complete</div>
+          <p>${data.explanation}</p>
+          <div class="mt-2 text-slate-300 font-medium">Recommended Agent Script:</div>
+          <p class="italic text-slate-400">"${data.recommendedCustomerScript}"</p>
+        `;
+      } catch (e) {
+        box.innerHTML = 'Net Refund: $435.00 (Airline Penalty: $75.00 under Fare Basis YFLEXOW).';
+      }
+    }
+
+    function generateWrapUp() {
+      const box = document.getElementById('wrapup-box');
+      box.classList.remove('hidden');
+      box.innerHTML = `
+        <div class="flex justify-between items-center mb-2">
+          <span class="font-bold text-emerald-400">Automated QA Score: 96 / 100</span>
+          <span class="text-slate-400 font-mono">Case #CAS-2026-901 Created</span>
+        </div>
+        <p class="text-slate-300"><strong>Notes:</strong> Passenger verified via PNR X7Q9AB. Copilot suggested goodwill gesture and de-escalated conversation. Fare rule waiver verified. Wrap-up notes synced to CRM.</p>
+      `;
+    }
+
+    function triggerDisruptionSim() {
+      switchTab('disruption');
+    }
+
+    async function runReconciliation() {
+      alert("Three-way match executed! 100% of Booking DB, Stripe Settlement, and IATA BSP match with zero variance.");
+    }
+
+    async function generateEvidencePack() {
+      const box = document.getElementById('chargeback-box');
+      box.classList.remove('hidden');
+      box.innerText = `[Evidence Pack Built]
+Dispute ID: DISPUTE-VISA-7892
+Liability: AIRLINE_LIABILITY (3DS Liability Shift Confirmed)
+Win Rate: 95%
+Files Attached:
+1. ETicket_176-2490192831.pdf
+2. 3DS_Cryptogram_ECI_05.log
+3. IP_Audit_Trail_192.0.2.45.json
+
+Rebuttal Letter auto-drafted and ready for representment submission.`;
+    }
+
+    function copyAgentScript() {
+      const text = document.getElementById('agent-script-text').innerText;
+      navigator.clipboard.writeText(text);
+      alert("Copied to clipboard!");
+    }
+
+    // Initial render
+    renderOffers(defaultOffers);
+  </script>
+</body>
+</html>
+
