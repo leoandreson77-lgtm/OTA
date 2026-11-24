@@ -115,6 +115,15 @@ const server = http.createServer(async (req, res) => {
   };
 
   const readBody = () => new Promise((resolve) => {
+    if (req.body !== undefined) {
+      if (typeof req.body === 'string') {
+        try { resolve(req.body ? JSON.parse(req.body) : {}); }
+        catch { resolve({}); }
+      } else {
+        resolve(req.body || {});
+      }
+      return;
+    }
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
@@ -635,10 +644,14 @@ Requested Action: Immediate representment credit reversal of $510.00 USD.`
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`========================================================`);
-  console.log(`🚀 Professional AI-Native OTA API Engine Running on :${PORT}`);
-  console.log(`   - Health check: http://localhost:${PORT}/health`);
-  console.log(`   - Topology:     http://localhost:${PORT}/api/system/topology`);
-  console.log(`========================================================`);
-});
+if (!process.env.VERCEL) {
+  server.listen(PORT, () => {
+    console.log(`========================================================`);
+    console.log(`🚀 Professional AI-Native OTA API Engine Running on :${PORT}`);
+    console.log(`   - Health check: http://localhost:${PORT}/health`);
+    console.log(`   - Topology:     http://localhost:${PORT}/api/system/topology`);
+    console.log(`========================================================`);
+  });
+}
+
+export default server;

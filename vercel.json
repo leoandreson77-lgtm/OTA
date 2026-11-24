@@ -3,11 +3,13 @@
   "services": {
     "api": {
       "root": "apps/api",
-      "runtime": "node"
+      "runtime": "node",
+      "entrypoint": "standalone.js"
     },
     "web": {
       "root": "apps/web",
       "runtime": "node",
+      "entrypoint": "server.js",
       "bindings": [
         {
           "type": "service",

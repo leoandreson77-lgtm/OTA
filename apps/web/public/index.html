@@ -649,23 +649,28 @@
 
         <!-- Live Ping Checklist -->
         <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
-          <div class="font-bold text-slate-300">Live Services Health Check & Latency Status:</div>
+          <div class="flex items-center justify-between">
+            <div class="font-bold text-slate-300">Live Services Health Check & Latency Status:</div>
+            <button onclick="checkTopologyHealth()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-indigo-300 text-[11px] font-mono border border-slate-700 transition">
+              <i class="fa-solid fa-rotate mr-1"></i> Ping Live Services
+            </button>
+          </div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
               <div class="text-slate-400 text-[10px]">WEB FRONTEND</div>
-              <div class="text-emerald-400 font-bold font-mono">200 OK (8ms)</div>
+              <div id="ping-web" class="text-emerald-400 font-bold font-mono">200 OK (8ms)</div>
             </div>
             <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
               <div class="text-slate-400 text-[10px]">API MICROSERVICE</div>
-              <div class="text-emerald-400 font-bold font-mono">200 OK (14ms)</div>
+              <div id="ping-api" class="text-emerald-400 font-bold font-mono">Checking...</div>
             </div>
             <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
               <div class="text-slate-400 text-[10px]">AMADEUS CONNECTOR</div>
-              <div class="text-emerald-400 font-bold font-mono">CONNECTED (142ms)</div>
+              <div id="ping-amadeus" class="text-emerald-400 font-bold font-mono">Checking...</div>
             </div>
             <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
               <div class="text-slate-400 text-[10px]">IATA NDC CONNECTOR</div>
-              <div class="text-emerald-400 font-bold font-mono">CONNECTED (95ms)</div>
+              <div id="ping-ndc" class="text-emerald-400 font-bold font-mono">Checking...</div>
             </div>
           </div>
         </div>
@@ -727,11 +732,10 @@
   <!-- JAVASCRIPT CONTROLLER -->
   <script>
     // Unified API Resolution:
-    // In local dev on port 3000 -> points to API server on 4000
-    // On Vercel -> empty string (uses relative /api routes routed by top-level rewrites)
-    const API_URL = (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '3000')
-      ? 'http://localhost:4000'
-      : '';
+    // Uses relative /api routes everywhere:
+    // - On Vercel: edge rewrites route /api/* to service "api" (or proxy via web binding)
+    // - Under `vercel dev` or `npm run start:web`: web service routes/proxies /api/* to API_SERVICE_URL
+    const API_URL = '';
 
     let selectedOfferForHold = null;
 
@@ -769,6 +773,9 @@
       if (activeBtn) {
         activeBtn.classList.remove('text-slate-400');
         activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+      }
+      if (tabId === 'topology') {
+        checkTopologyHealth();
       }
     }
 
@@ -1051,10 +1058,40 @@
     }
 
     // Disruption Sim
-    function triggerDisruptionSim() {
+    async function triggerDisruptionSim() {
       playBeep(650, 0.1);
       switchTab('disruption');
-      alert("🚨 Flight Disruption Alert detected by Radar Engine: Flight EK-512 delayed by 240 mins. Traveler prioritized (Score: 95/100). Alternate flight pre-held on EK-902.");
+      try {
+        const res = await fetch(`${API_URL}/api/disruption/trigger`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ flightNumber: 'EK-512', delayDurationMinutes: 240 })
+        });
+        const data = await res.json();
+        alert(`🚨 ${data.proactiveOutreachNotification.header}\n\nPriority Score: ${data.impactedTraveler.priorityScore}/100\nSLA: ${data.proactiveOutreachNotification.slaMinutes} min (< 2 min target)\nWhatsApp Sent: ${data.proactiveOutreachNotification.status}`);
+      } catch (e) {
+        alert("🚨 Flight Disruption Alert detected by Radar Engine: Flight EK-512 delayed by 240 mins. Traveler prioritized (Score: 95/100). Alternate flight pre-held on EK-902.");
+      }
+    }
+
+    async function checkTopologyHealth() {
+      const apiEl = document.getElementById('ping-api');
+      const amaEl = document.getElementById('ping-amadeus');
+      const ndcEl = document.getElementById('ping-ndc');
+      if (!apiEl) return;
+
+      const t0 = performance.now();
+      try {
+        const res = await fetch(`${API_URL}/api/system/topology`);
+        const data = await res.json();
+        const ms = Math.max(1, Math.round(performance.now() - t0));
+        apiEl.innerText = `200 OK (${ms}ms)`;
+        amaEl.innerText = `${data.connectors.amadeus.status} (${data.connectors.amadeus.latencyMs}ms)`;
+        ndcEl.innerText = `${data.connectors.iataNdc.status} (${data.connectors.iataNdc.latencyMs}ms)`;
+      } catch (e) {
+        apiEl.innerText = 'OFFLINE / FALLBACK';
+        apiEl.className = 'text-amber-400 font-bold font-mono';
+      }
     }
 
     function confirmWhatsAppRebook() {

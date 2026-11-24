@@ -3,15 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "main": "standalone.js",
   "scripts": {
     "dev": "node standalone.js",
     "start": "node standalone.js",
-    "build": "tsc"
-  },
-  "dependencies": {
-    "@ota/core": "*",
-    "@ota/ai-engine": "*",
-    "@ota/supply-orchestrator": "*",
-    "@ota/money-ops": "*"
+    "build:ts": "tsc"
   }
 }
