@@ -47,3 +47,4 @@ export class LookToBookShield {
     return { cachedRoutesCount: this.cache.size };
   }
 }
+

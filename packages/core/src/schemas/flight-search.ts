@@ -54,3 +54,4 @@ export const FlightOfferSchema = z.object({
   validUntil: z.string() // ISO 8601 TTL for the quote
 });
 export type FlightOffer = z.infer<typeof FlightOfferSchema>;
+

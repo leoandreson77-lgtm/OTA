@@ -124,3 +124,4 @@ export const UnifiedTripSchema = z.object({
   updatedAt: z.string()
 });
 export type UnifiedTrip = z.infer<typeof UnifiedTripSchema>;
+

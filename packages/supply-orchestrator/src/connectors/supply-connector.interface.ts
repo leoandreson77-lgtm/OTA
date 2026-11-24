@@ -6,3 +6,4 @@ export interface ISupplyConnector {
   searchFlights(query: FlightSearchQuery): Promise<FlightOffer[]>;
   createBookingHold(offer: FlightOffer, passengers: Passenger[]): Promise<PNRRecord>;
 }
+

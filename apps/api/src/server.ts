@@ -273,3 +273,4 @@ server.listen(PORT, () => {
   console.log(`   - GET  /api/trips/:id`);
   console.log(`====================================================`);
 });
+

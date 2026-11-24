@@ -14,3 +14,4 @@ export const FareRuleAnalysisSchema = z.object({
   admRiskFactors: z.array(z.string()).default([])
 });
 export type FareRuleAnalysis = z.infer<typeof FareRuleAnalysisSchema>;
+
